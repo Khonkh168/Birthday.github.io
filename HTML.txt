@@ -1,0 +1,215 @@
+<meta name='viewport' content='width=device-width, initial-scale=1'/><!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Happy Birthday!</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="birthday-container">
+        <h1 class="birthday-message">រីករាយថ្ងៃកំណើត រូហ្សា!</h1>
+        <div id="balloon-container"></div>
+        <div id="fireworks-container"></div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
+<style>body {
+    margin: 0;
+    overflow: hidden;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: linear-gradient(to bottom, #0a0a2a, #2a0a3a); /* Dark celebratory background */
+    font-family: 'Arial', sans-serif;
+    color: white;
+}
+
+.birthday-container {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden; /* Hide overflowing elements like balloons */
+}
+
+.birthday-message {
+    font-size: 5em;
+    text-shadow: 0 0 15px rgba(255, 255, 255, 0.7), 0 0 30px rgba(255, 100, 200, 0.8);
+    z-index: 10; /* Ensure message is above balloons/fireworks */
+    animation: pulse 2s infinite alternate; /* Simple pulse effect */
+}
+
+@keyframes pulse {
+    from { transform: scale(1); }
+    to { transform: scale(1.05); }
+}
+
+/* --- Balloon Styles --- */
+.balloon {
+    position: absolute;
+    width: 60px;
+    height: 80px;
+    background-color: red; /* Default, will be randomized by JS */
+    border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%; /* Balloon shape */
+    box-shadow: inset -10px -10px 0 rgba(0,0,0,0.2);
+    animation: floatUp 10s infinite linear; /* Base animation */
+    z-index: 5;
+}
+
+.balloon::after {
+    content: '';
+    position: absolute;
+    bottom: -15px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0;
+    height: 0;
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-top: 15px solid currentColor; /* Use balloon color */
+}
+
+.balloon::before { /* String */
+    content: '';
+    position: absolute;
+    bottom: -35px; /* Adjust based on knot size */
+    left: 50%;
+    transform: translateX(-50%);
+    width: 1px;
+    height: 20px;
+    background-color: rgba(255, 255, 255, 0.7);
+}
+
+
+@keyframes floatUp {
+    0% { transform: translateY(100vh) translateX(0); opacity: 1; }
+    50% { transform: translateY(50vh) translateX(20px); } /* Slight sway */
+    100% { transform: translateY(-10vh) translateX(-20px); opacity: 0; } /* Go off screen */
+}
+
+/* --- Firework Styles --- */
+.firework {
+    position: absolute;
+    width: 5px;
+    height: 5px;
+    background-color: white; /* Default, will be randomized by JS */
+    border-radius: 50%;
+    opacity: 0; /* Start hidden */
+    transform: scale(0); /* Start small */
+    animation: fireworkExplode 1s forwards;
+    z-index: 8;
+}
+
+@keyframes fireworkExplode {
+    0% { transform: scale(0); opacity: 1; }
+    20% { transform: scale(1); opacity: 1; }
+    100% { transform: scale(0.1); opacity: 0; } /* Fade out and shrink */
+}
+</style><script>document.addEventListener('DOMContentLoaded', () => {
+    const balloonContainer = document.getElementById('balloon-container');
+    const fireworksContainer = document.getElementById('fireworks-container');
+
+    const colors = ['#ff6f61', '#ffc107', '#4caf50', '#2196f3', '#9c27b0', '#ffeb3b']; // Cheerful colors
+
+    // --- Balloons ---
+    function createBalloon() {
+        const balloon = document.createElement('div');
+        balloon.classList.add('balloon');
+
+        // Randomize color
+        const randomColor = colors[Math.floor(Math.random() * colors.length)];
+        balloon.style.backgroundColor = randomColor;
+        // Set current color for the knot
+        balloon.style.setProperty('--balloon-color', randomColor); // Custom property for pseudo-element
+
+        // Randomize starting position (bottom of the screen)
+        const startLeft = Math.random() * 90 + 5; // 5% to 95% width
+        balloon.style.left = `${startLeft}vw`;
+
+        // Randomize animation duration and delay
+        const duration = 8 + Math.random() * 4; // 8-12 seconds
+        const delay = Math.random() * 5; // 0-5 seconds delay
+        balloon.style.animationDuration = `${duration}s`;
+        balloon.style.animationDelay = `-${delay}s`; // Negative delay to start animation immediately
+
+        balloonContainer.appendChild(balloon);
+
+        // Remove balloon after it goes off screen
+        setTimeout(() => {
+            balloon.remove();
+        }, duration * 1000);
+    }
+
+    // Generate balloons periodically
+    setInterval(createBalloon, 1000); // Create a new balloon every second
+    for (let i = 0; i < 10; i++) { // Initial burst of balloons
+        createBalloon();
+    }
+
+
+    // --- Fireworks ---
+    function createFirework(x, y) {
+        const numSparks = 30 + Math.floor(Math.random() * 20); // 30-50 sparks
+        const fireworkColor = colors[Math.floor(Math.random() * colors.length)];
+
+        for (let i = 0; i < numSparks; i++) {
+            const spark = document.createElement('div');
+            spark.classList.add('firework');
+            spark.style.backgroundColor = fireworkColor;
+
+            // Calculate random direction and distance
+            const angle = Math.random() * Math.PI * 2; // Full circle
+            const distance = Math.random() * 80 + 30; // 30-110 pixels
+            const endX = x + distance * Math.cos(angle);
+            const endY = y + distance * Math.sin(angle);
+
+            spark.style.left = `${x}px`;
+            spark.style.top = `${y}px`;
+
+            // Apply a transform to simulate outward movement
+            spark.style.setProperty('--end-x', `${endX}px`);
+            spark.style.setProperty('--end-y', `${endY}px`);
+
+            // Use a custom keyframe for each spark to animate its path
+            const fireworkAnimation = `fireworkSpark ${0.8 + Math.random() * 0.4}s forwards`; // 0.8-1.2s
+            spark.style.animation = fireworkAnimation;
+
+            fireworksContainer.appendChild(spark);
+
+            // Remove spark after animation
+            setTimeout(() => {
+                spark.remove();
+            }, (0.8 + Math.random() * 0.4) * 1000);
+        }
+    }
+
+    // Add a keyframe rule for firework sparks dynamically
+    // This allows unique end positions for each spark
+    const styleSheet = document.styleSheets[0];
+    styleSheet.insertRule(`
+        @keyframes fireworkSpark {
+            0% { transform: translate(0, 0) scale(0.1); opacity: 1; }
+            100% { transform: translate(var(--end-x), var(--end-y)) scale(0.01); opacity: 0; }
+        }
+    `, styleSheet.cssRules.length);
+
+
+    // Trigger fireworks randomly
+    setInterval(() => {
+        const randomX = Math.random() * window.innerWidth;
+        const randomY = Math.random() * window.innerHeight * 0.6; // Upper 50% of screen
+        createFirework(randomX, randomY);
+    }, 1500); // Every 1.5 seconds
+
+    // Trigger fireworks on mouse click
+    document.addEventListener('click', (event) => {
+        createFirework(event.clientX, event.clientY);
+    });
+});
+</script>
